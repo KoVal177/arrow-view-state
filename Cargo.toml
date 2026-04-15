@@ -1,20 +1,24 @@
 [package]
-name        = "arrow-view-state"
-version     = "0.2.0"
-edition     = "2024"
-rust-version = "1.85"
-license     = "MIT OR Apache-2.0"
-description = "High-performance columnar permutation index and filter engine for Apache Arrow"
-keywords    = ["arrow", "sort", "index", "columnar", "permutation"]
-categories  = ["data-structures", "science"]
-publish     = false
+name          = "arrow-view-state"
+version       = "0.1.0"
+edition       = "2024"
+rust-version  = "1.94"
+authors       = ["KoVal177 <58688524+KoVal177@users.noreply.github.com>"]
+license       = "MIT OR Apache-2.0"
+description   = "High-performance columnar permutation index and filter engine for Apache Arrow"
+repository    = "https://github.com/KoVal177/arrow-view-state"
+homepage      = "https://github.com/KoVal177/arrow-view-state"
+documentation = "https://docs.rs/arrow-view-state"
+readme        = "README.md"
+keywords      = ["arrow", "sort", "index", "columnar", "permutation"]
+categories    = ["data-structures", "science"]
+exclude       = [".github/", ".llm_instructions/"]
 
 [dependencies]
 # Core Arrow — only what we use. No umbrella crate.
-arrow-array  = { version = ">=53", default-features = false }
-arrow-row    = { version = ">=53", default-features = false }
-arrow-schema = { version = ">=53", default-features = false }
-arrow-select = { version = ">=53", default-features = false }
+arrow-array  = { version = "58", default-features = false }
+arrow-row    = { version = "58", default-features = false }
+arrow-schema = { version = "58", default-features = false }
 
 # Error handling
 thiserror = "2"
@@ -28,16 +32,33 @@ rayon = { version = "1", optional = true }
 # Roaring Bitmap filter index
 roaring = "0.10"
 
+# SIMD predicate evaluation (feature-gated)
+arrow-ord     = { version = "58", default-features = false, optional = true }
+
+# Float hashing for hash-index (feature-gated)
+ordered-float = { version = "5", optional = true }
+
+# Memory-mapped storage (feature-gated)
+memmap2  = { version = "0.9", optional = true }
+tempfile = { version = "3",   optional = true }
+
 [dev-dependencies]
-arrow-cast = ">=53"
+arrow-cast = "58"
 proptest   = "1"
+tempfile   = "3"
 
 [features]
 default  = ["parallel"]
 parallel = ["dep:rayon"]
+mmap     = ["dep:memmap2", "dep:tempfile"]
+evaluate = ["dep:arrow-ord"]
+persist  = ["mmap"]
+hash-index     = ["dep:ordered-float"]
+inverted-index = []
+full           = ["parallel", "evaluate", "hash-index", "inverted-index", "persist"]
 
 [lints.rust]
-unsafe_code  = "forbid"
+unsafe_code  = "deny"
 missing_docs = "warn"
 
 [lints.clippy]
