@@ -681,7 +681,7 @@ mod proptests {
 }
 
 #[cfg(test)]
-#[allow(clippy::cast_possible_truncation)]
+#[allow(clippy::cast_possible_truncation, clippy::single_range_in_vec_init)]
 mod selection_tests {
     use std::sync::Arc;
 
@@ -869,6 +869,7 @@ mod selection_proptests {
 
 // ─── Evaluate tests ───────────────────────────────────────────────────────────
 #[cfg(feature = "evaluate")]
+#[allow(clippy::unwrap_used)]
 mod evaluate_tests {
     use std::sync::Arc;
 
@@ -1016,6 +1017,11 @@ mod evaluate_tests {
 }
 
 #[cfg(feature = "evaluate")]
+#[allow(
+    clippy::unwrap_used,
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap
+)]
 mod evaluate_proptests {
     use std::sync::Arc;
 
@@ -1087,6 +1093,7 @@ mod evaluate_proptests {
 
 // ─── Persist tests ────────────────────────────────────────────────────────────
 #[cfg(feature = "persist")]
+#[allow(clippy::unwrap_used, clippy::cast_possible_truncation)]
 mod persist_tests {
     use std::sync::Arc;
 
@@ -1254,6 +1261,7 @@ mod persist_tests {
 }
 
 #[cfg(feature = "persist")]
+#[allow(clippy::cast_possible_truncation)]
 mod persist_proptests {
     use std::sync::Arc;
 
@@ -1540,6 +1548,7 @@ mod inverted_index_tests {
 // ═══════════════════════════════════════════════════════════════════════════
 
 #[cfg(feature = "hash-index")]
+#[allow(clippy::cast_possible_truncation)]
 mod hash_index_proptests {
     use arrow_array::Int64Array;
     use proptest::prelude::*;
@@ -1591,6 +1600,7 @@ mod hash_index_proptests {
 // ═══════════════════════════════════════════════════════════════════════════
 
 #[cfg(feature = "inverted-index")]
+#[allow(clippy::redundant_closure_for_method_calls)]
 mod inverted_index_proptests {
     use arrow_array::StringArray;
     use proptest::prelude::*;
