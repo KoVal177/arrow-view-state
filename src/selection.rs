@@ -1,7 +1,7 @@
 //! Physical row selection for late materialisation.
 //!
 //! [`PhysicalSelection`] is a set of non-overlapping, ascending physical row ID
-//! ranges. It is the output of [`PermutationIndex::to_physical_selection`] and
+//! ranges. It is the output of [`crate::PermutationIndex::to_physical_selection`] and
 //! can be trivially converted to `parquet::arrow::arrow_reader::RowSelection`
 //! by downstream consumers (the conversion lives outside this crate to avoid
 //! a parquet dependency).
