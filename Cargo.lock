@@ -143,16 +143,19 @@ dependencies = [
 
 [[package]]
 name = "arrow-view-state"
-version = "0.2.0"
+version = "0.1.0"
 dependencies = [
  "arrow-array",
  "arrow-cast",
+ "arrow-ord",
  "arrow-row",
  "arrow-schema",
- "arrow-select",
+ "memmap2",
+ "ordered-float",
  "proptest",
  "rayon",
  "roaring",
+ "tempfile",
  "thiserror",
  "tracing",
 ]
@@ -580,6 +583,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
 
 [[package]]
+name = "memmap2"
+version = "0.9.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "714098028fe011992e1c3962653c96b2d578c4b4bce9036e15ff220319b1e0e3"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "num-bigint"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -622,6 +634,15 @@ name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+
+[[package]]
+name = "ordered-float"
+version = "5.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b7d950ca161dc355eaf28f82b11345ed76c6e1f6eb1f4f4479e0323b9e2fbd0e"
+dependencies = [
+ "num-traits",
+]
 
 [[package]]
 name = "pin-project-lite"

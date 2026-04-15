@@ -62,16 +62,27 @@ impl FilterIndex {
     /// This is the core composition operation:
     /// `sorted_and_filtered = filter.apply_to_permutation(&sorted)`
     ///
+    /// Processes in chunks to avoid reading entire mmap indices at once.
     /// Time: O(n) where n = permutation length, with O(1) membership checks
     /// via the Roaring Bitmap.
+    #[allow(clippy::cast_possible_truncation)] // len ≤ u32::MAX by construction
     pub fn apply_to_permutation(&self, permutation: &PermutationIndex) -> PermutationIndex {
-        let values: Vec<u32> = permutation
-            .indices()
-            .values()
-            .iter()
-            .filter(|&&id| self.mask.contains(id))
-            .copied()
-            .collect();
+        const CHUNK: usize = 65_536;
+        let len = permutation.len() as usize;
+        let mut values = Vec::new();
+
+        let mut offset = 0;
+        while offset < len {
+            let end = (offset + CHUNK).min(len);
+            let chunk = permutation.read_range(offset, end);
+            for &id in &chunk {
+                if self.mask.contains(id) {
+                    values.push(id);
+                }
+            }
+            offset = end;
+        }
+
         PermutationIndex::from_array(UInt32Array::from(values))
     }
 
@@ -96,17 +107,57 @@ impl FilterIndex {
     /// Negate filter within a universe of `total_rows` physical rows.
     ///
     /// Returns a filter containing all rows in `[0, total_rows)` that are
-    /// NOT in the current filter.
+    /// NOT in the current filter. Uses `insert_range` for O(containers)
+    /// universe construction instead of O(elements) iteration.
     #[must_use]
     pub fn negate(&self, total_rows: u32) -> FilterIndex {
-        let universe: RoaringBitmap = (0..total_rows).collect();
+        let mut universe = RoaringBitmap::new();
+        universe.insert_range(0..total_rows);
         FilterIndex {
-            mask: &universe - &self.mask,
+            mask: universe - &self.mask,
         }
+    }
+
+    /// Set difference: rows in `self` but not in `other`.
+    ///
+    /// Equivalent to `self ∩ ¬other`, but without allocating the negation.
+    #[must_use]
+    pub fn difference(&self, other: &FilterIndex) -> FilterIndex {
+        FilterIndex {
+            mask: &self.mask - &other.mask,
+        }
+    }
+
+    /// Convert to a `BooleanArray` of length `total_rows`.
+    ///
+    /// `true` at position `i` means physical row `i` passes the filter.
+    pub fn into_boolean_array(&self, total_rows: u32) -> BooleanArray {
+        let values: Vec<bool> = (0..total_rows).map(|i| self.mask.contains(i)).collect();
+        BooleanArray::from(values)
     }
 
     /// Iterate over matching physical row IDs in ascending order.
     pub fn iter(&self) -> impl Iterator<Item = u32> + '_ {
         self.mask.iter()
+    }
+
+    /// Access the underlying bitmap (for persistence and index types).
+    #[allow(dead_code)] // used by feature-gated modules
+    pub(crate) fn bitmap(&self) -> &RoaringBitmap {
+        &self.mask
+    }
+
+    /// Construct from a raw bitmap (for persistence and index types).
+    #[allow(dead_code)] // used by feature-gated modules
+    pub(crate) fn from_bitmap(mask: RoaringBitmap) -> Self {
+        Self { mask }
+    }
+
+    /// Construct from a borrowed bitmap (clone).
+    #[allow(dead_code)] // used by feature-gated modules
+    pub(crate) fn from_bitmap_ref(bitmap: &RoaringBitmap) -> Self {
+        Self {
+            mask: bitmap.clone(),
+        }
     }
 }
