@@ -1017,7 +1017,11 @@ mod evaluate_tests {
 }
 
 #[cfg(feature = "evaluate")]
-#[allow(clippy::unwrap_used, clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap
+)]
 mod evaluate_proptests {
     use std::sync::Arc;
 
